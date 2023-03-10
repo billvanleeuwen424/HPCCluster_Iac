@@ -1,3 +1,14 @@
+variable "node_count" {
+  type        = string
+  description = "The amount of nodes-1 in the cluster"
+    nullable = false
+}
+
+
+
+
+
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -77,6 +88,13 @@ resource "aws_security_group" "public_security_group" {
     protocol        = "-1"
     cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
   }
+
+    egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "private_security_group" {
@@ -104,7 +122,7 @@ resource "aws_instance" "public_instance" {
 }
 
 resource "aws_instance" "private_instance" {
-  count                  = 2
+  count                  = var.node_count
   ami                    = "ami-0557a15b87f6559cf"
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.private_subnet.id
