@@ -13,9 +13,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_key_pair" "my_ssh_key" {
-  key_name   = "aws-cluster-key"
+resource "aws_key_pair" "pubnet_key" {
+  key_name   = "aws-pubnet-cluster-key"
   public_key = file("~/.ssh/aws-cluster-key.pub")
+}
+
+resource "aws_key_pair" "prinet_key" {
+  key_name   = "aws-prinet-cluster-key"
+  public_key = file("../keys/aws-private-cluster-key.pub")
 }
 
 resource "aws_vpc" "cluster_vpc" {
@@ -114,7 +119,7 @@ resource "aws_instance" "public_instance" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.public_security_group.id]
-  key_name               = "aws-cluster-key"
+  key_name               = "aws-pubnet-cluster-key"
 
   tags = {
     Name = "PublicInstance"
@@ -127,7 +132,7 @@ resource "aws_instance" "private_instance" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.private_subnet.id
   vpc_security_group_ids = [aws_security_group.private_security_group.id]
-  key_name               = "aws-cluster-key"
+  key_name               = "aws-prinet-cluster-key"
 
   tags = {
     Name = "PrivateInstance-${count.index}"

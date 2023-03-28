@@ -1,18 +1,48 @@
-- name: Install and Start Slurm
-  hosts: host-node
-  become: true
+- name: Update and Install Packages on Host Node
+  hosts: host_node
 
   tasks:
-    - name: Update apt cache
+    - name: Copy private ssh key to the machine
+      ansible.builtin.copy:
+        src: ../keys/aws-private-cluster-key
+        dest: ~/.ssh/
+        mode: '0600'
+
+    - name: Copy public ssh key to the machine
+      ansible.builtin.copy:
+        src: ../keys/aws-private-cluster-key.pub
+        dest: ~/.ssh/
+        mode: '0644'
+
+    - name: Apt update
+      become: true
       ansible.builtin.apt:
         update_cache: true
+        upgrade: dist
 
-    - name: Upgrade packages
+    - name: Apt upgrade
+      become: true
       ansible.builtin.apt:
         upgrade: dist
 
-    - name: Install Slurm
+    - name: Install Slurm and other needed packages
+      become: true
       ansible.builtin.apt:
         name:
           - slurm-wlm
+          - software-properties-common
+        state: present
+
+    - name: Add Ansible PPA repository
+      become: true
+      ansible.builtin.apt_repository:
+        repo: 'ppa:ansible/ansible'
+        state: present
+        update_cache: true
+
+    - name: Install ansible
+      become: true
+      ansible.builtin.apt:
+        name:
+          - ansible
         state: present
