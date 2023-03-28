@@ -4,16 +4,24 @@ import json
 with open('../terraform/terraform.tfstate', 'r') as f:
     state = json.load(f)
 
-# Extract the public IP address of each EC2 instance in the state file
-public_ips = []
+# Extract the public and private IP addresses of each EC2 instance in the state file
+public_ip = None
+private_ips = []
 for resource in state['resources']:
     if resource['type'] == 'aws_instance':
-        public_ip = resource['instances'][0]['attributes'].get('public_ip', None)
-        if public_ip:
-            public_ips.append(public_ip)
+        for instance in resource['instances']:
+            private_ip = instance['attributes'].get('private_ip', None)
+            public_ip_attr = resource['instances'][0]['attributes'].get('public_ip', None)
+            if public_ip_attr:
+                public_ip = public_ip_attr
+            else:
+                private_ips.append(private_ip)
 
 # Write the public IPs to an Ansible inventory file
-with open('../ansible/inventory/host_node.ini', 'w') as f:
-    f.write('[host_node]\n')
-    for ip in public_ips:
-        f.write("ubuntu1 ansible_host=" + ip + " ansible_user=ubuntu" + " ansible_ssh_private_key_file=~/.ssh/aws-cluster-key" + '\n')
+with open('../ansible/inventory/inventory.ini', 'w') as f:
+    f.write('[public_node]\n')
+    f.write("ubuntu0 ansible_host={} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/aws-cluster-key\n".format(public_ip))
+    f.write('\n\n[pri_nodes]\n')
+    for i in range(0,len(private_ips)):
+        f.write("ubuntu{} ansible_host={} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../keys/aws-private-cluster-key\n".format(i+1, private_ips[i]))
+
