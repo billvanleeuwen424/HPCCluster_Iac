@@ -4,11 +4,6 @@ variable "node_count" {
     nullable = false
 }
 
-
-
-
-
-
 provider "aws" {
   region = "us-east-1"
 }
@@ -106,11 +101,18 @@ resource "aws_security_group" "private_security_group" {
   name_prefix = "PrivateSecurityGroup"
   vpc_id      = aws_vpc.cluster_vpc.id
 
-  ingress {
+  egress {
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
-    security_groups = [aws_security_group.public_security_group.id]
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
   }
 }
 
@@ -130,7 +132,7 @@ resource "aws_instance" "private_instance" {
   count                  = var.node_count
   ami                    = "ami-0557a15b87f6559cf"
   instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.private_subnet.id
+  subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.private_security_group.id]
   key_name               = "aws-prinet-cluster-key"
 

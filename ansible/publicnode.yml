@@ -38,20 +38,5 @@
       ansible.builtin.apt:
         name:
           - slurm-wlm
-          - squid
+          - munge
         state: present
-
-    - name: Squid configuration
-      become: true
-      ansible.builtin.template:
-        src: "templates/squid.conf.j2"
-        dest: "/etc/squid/squid.conf"
-        mode: '0604'
-        owner: ubuntu
-
-    - name: Start the proxy server
-      become: true
-      ansible.builtin.systemd:
-        state: started
-        enabled: true
-        name: squid

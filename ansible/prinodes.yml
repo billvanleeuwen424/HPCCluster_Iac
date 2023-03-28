@@ -1,0 +1,40 @@
+- name: Update and Install Packages on private
+  hosts: pri_nodes
+  tasks:
+
+    - name: Copy private ssh key to the machine
+      ansible.builtin.copy:
+        src: ../keys/nodekey
+        dest: ~/.ssh/
+        mode: '0600'
+
+    - name: Copy public ssh key to the machine
+      ansible.builtin.copy:
+        src: ../keys/nodekey.pub
+        dest: ~/.ssh/
+        mode: '0644'
+
+    - name: Allow the head node to ssh into these nodes
+      ansible.posix.authorized_key:
+        user: ubuntu
+        state: present
+        key: "{{ lookup('file', '../keys/aws-private-cluster-key.pub') }}"
+
+    - name: Apt update
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+
+    - name: Apt upgrade
+      become: true
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: Install Slurm and other needed packages
+      become: true
+      ansible.builtin.apt:
+        name:
+          - slurm-wlm
+          - munge
+        state: present
