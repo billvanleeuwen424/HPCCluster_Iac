@@ -24,4 +24,25 @@ with open('../ansible/inventory/inventory.ini', 'w') as f:
     f.write('\n\n[pri_nodes]\n')
     for i in range(0,len(private_ips)):
         f.write("ubuntu{} ansible_host={} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../keys/aws-private-cluster-key\n".format(i+1, private_ips[i]))
+f.close()
 
+# set up the ansible config
+with open('../ansible/ansible.cfg', 'w') as f:
+    f.write('[defaults]\n')
+    f.write('inventory = inventory/inventory.ini\n\n')
+    f.write('[ssh_connection]\n')
+    f.write('ssh_args = -o ProxyCommand="ssh -W %h:%p ubuntu@{}  -i ~/.ssh/aws-cluster-key"'.format(public_ip))
+f.close()
+
+# set up the squid configuration
+with open('../ansible/templates/squid.conf.j2', 'w') as f:
+    f.write('acl allowed_ips src ')
+    for i in private_ips:
+        f.write('{} '.format(i))
+    f.write('\nhttp_access allow allowed_ips\n')
+    f.write('\nhttp_port 3128\n')
+    f.write('cache_dir ufs /var/spool/squid 100 16 256\n')
+    f.write('access_log /var/log/squid/access.log squid\n')
+    f.write('cache_mem 256 MB\n')
+    f.write('maximum_object_size 4 MB\n')
+    f.write('visible_hostname squid-proxy\n')
