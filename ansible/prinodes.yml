@@ -38,3 +38,12 @@
           - slurm-wlm
           - munge
         state: present
+
+    - name: Copy hosts file onto the machine
+      become: true
+      ansible.builtin.copy:
+        src: hosts/hosts
+        dest: /etc/hosts
+        owner: ubuntu
+        group: ubuntu
+        mode: '0666'

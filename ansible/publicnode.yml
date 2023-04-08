@@ -1,7 +1,6 @@
 - name: Update and Install Packages on public Node
   hosts: public_node
   vars:
-    squid_port: 3128
     localnet: "10.0.0.0/16"
   tasks:
     - name: Copy private ssh key to the machine
@@ -40,3 +39,12 @@
           - slurm-wlm
           - munge
         state: present
+
+    - name: Copy hosts file onto the machine
+      become: true
+      ansible.builtin.copy:
+        src: hosts/hosts
+        dest: /etc/hosts
+        owner: ubuntu
+        group: ubuntu
+        mode: '0666'

@@ -95,6 +95,13 @@ resource "aws_security_group" "public_security_group" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port = 6818
+    to_port = 6818
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "private_security_group" {
@@ -112,6 +119,13 @@ resource "aws_security_group" "private_security_group" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+    cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
+  }
+
+  ingress {
+    from_port = 6818
+    to_port = 6818
+    protocol = "tcp"
     cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
   }
 }

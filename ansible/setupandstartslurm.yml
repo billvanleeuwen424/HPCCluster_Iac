@@ -1,0 +1,54 @@
+- name: Copy the conf files and munge key from the controller node to the public nodes
+  hosts: all
+  tasks:
+    - name: Copy munge key
+      become: true
+      ansible.builtin.copy:
+        src: /etc/munge/munge.key
+        dest: /etc/munge/munge.key
+        remote_src: true
+        owner: munge
+        group: munge
+        mode: '0600'
+      delegate_to: "{{ groups['public_node'][0] }}"
+
+    - name: Copy slurm.conf
+      become: true
+      ansible.builtin.copy:
+        src: slurmconfigs/slurm.conf
+        dest: /etc/slurm/slurm.conf
+        owner: ubuntu
+        group: ubuntu
+        mode: '0666'
+
+    - name: Copy cgroups.conf
+      become: true
+      ansible.builtin.copy:
+        src: slurmconfigs/cgroups.conf
+        dest: /etc/slurm/cgroups.conf
+        owner: ubuntu
+        group: ubuntu
+        mode: '0666'
+
+    - name: Copy cgroup_allowed_devices_file.conf
+      become: true
+      ansible.builtin.copy:
+        src: slurmconfigs/cgroup_allowed_devices_file.conf
+        dest: /etc/slurm/cgroup_allowed_devices_file.conf
+        owner: ubuntu
+        group: ubuntu
+        mode: '0666'
+
+    - name: Start slurm
+      become: true
+      ansible.builtin.systemd:
+        name: slurmd
+        state: started
+        enabled: true
+
+    - name: Start munge
+      become: true
+      ansible.builtin.systemd:
+        name: munge
+        state: started
+        enabled: true
