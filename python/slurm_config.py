@@ -23,8 +23,6 @@ with open('../ansible/slurmconfigs/slurm.conf', 'w') as f:
     f.write("NodeName=node[1-{}] CPUs=2 Sockets=1 CoresPerSocket=1 ThreadsPerCore=2 State=UNKNOWN\n".format(len(pri_node_pri_address)))
 
     f.write("\n\n")
-    # f.write("ControlMachine=node0\n")
-    # f.write("ControlAddr=node0\n")
     f.write("SlurmctldHost=node0\n")
     f.write("PartitionName=mycluster Nodes=ALL Default=YES MaxTime=INFINITE State=UP\n")
     f.write("ClusterName=aws-cluster\n")

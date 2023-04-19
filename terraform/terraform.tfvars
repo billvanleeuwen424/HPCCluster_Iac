@@ -1,1 +1,2 @@
-node_count = 2
+node_count = 5
+instance_type = "t3.small"
