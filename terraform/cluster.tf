@@ -76,17 +76,10 @@ resource "aws_security_group" "public_security_group" {
   vpc_id      = aws_vpc.cluster_vpc.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
   }
 
     egress {
@@ -96,43 +89,43 @@ resource "aws_security_group" "public_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port = 6818
-    to_port = 6818
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   from_port = 6818
+  #   to_port = 6818
+  #   protocol = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
 }
 
 resource "aws_security_group" "private_security_group" {
   name_prefix = "PrivateSecurityGroup"
   vpc_id      = aws_vpc.cluster_vpc.id
 
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
+    egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port = 6818
-    to_port = 6818
-    protocol = "tcp"
-    cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
-  }
+  # ingress {
+  #   from_port = 6818
+  #   to_port = 6818
+  #   protocol = "tcp"
+  #   cidr_blocks = [aws_vpc.cluster_vpc.cidr_block]
+  # }
 }
 
 resource "aws_instance" "public_instance" {
   ami                    = "ami-0557a15b87f6559cf"
-  instance_type          = "t2.micro"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.public_security_group.id]
   key_name               = "aws-pubnet-cluster-key"
@@ -145,7 +138,7 @@ resource "aws_instance" "public_instance" {
 resource "aws_instance" "private_instance" {
   count                  = var.node_count
   ami                    = "ami-0557a15b87f6559cf"
-  instance_type          = "t2.micro"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.private_security_group.id]
   key_name               = "aws-prinet-cluster-key"

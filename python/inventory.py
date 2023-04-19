@@ -20,10 +20,10 @@ pri_node_pri_address = [i['attributes']['private_ip'] for r in private_instances
 # set up the ansible inventory file
 with open('../ansible/inventory/inventory.ini', 'w') as f:
     f.write('[public_node]\n')
-    f.write("ubuntu0 ansible_host={} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/aws-cluster-key\n".format(pub_node_pub_ip))
+    f.write("node0 ansible_host={} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/aws-cluster-key\n".format(pub_node_pub_ip))
     f.write('\n\n[pri_nodes]\n')
     for i in range(0,len(pri_node_pri_address)):
-        f.write("ubuntu{} ansible_host={} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../keys/aws-private-cluster-key\n".format(i+1, pri_node_pri_address[i]))
+        f.write("node{} ansible_host={} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../keys/aws-private-cluster-key\n".format(i+1, pri_node_pri_address[i]))
 f.close()
 
 # set up the ansible config
